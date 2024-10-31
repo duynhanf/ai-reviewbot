@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 )
@@ -22,27 +22,29 @@ func getRequirementFromGithubPullRequest(owner string, repo string, pullRequestN
 
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return ""
 	}
 
 	defer resp.Body.Close()
 
 	// Read the response body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		return ""
 	}
 
 	// Parse the response body
 	var pullRequest map[string]interface{}
 	err = json.Unmarshal(body, &pullRequest)
 	if err != nil {
-		panic(err)
+		return ""
 	}
 
-	requirement := pullRequest["body"].(string)
+	if pullRequest["body"] == nil {
+		return ""
+	}
 
-	return requirement
+	return pullRequest["body"].(string)
 }
 
 func getDiffFromGithubPullRequest(owner string, repo string, pullRequestNumber string) string {
@@ -66,7 +68,7 @@ func getDiffFromGithubPullRequest(owner string, repo string, pullRequestNumber s
 	defer resp.Body.Close()
 
 	// Read the response body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
 	}

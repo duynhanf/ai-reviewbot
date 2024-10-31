@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 )
@@ -33,6 +33,8 @@ func getReviewFromOpenAI(requirement string, reviewContent string) []string {
 				Please answer in English.
 				No need break down the code, just focus on the quality of the code.
 				No need to write a long review.
+				Please comment on each file in the diff.
+				No need review removed code changes that starts with a '-'.
 				Please answer in 2-3 sentences.
 			`,
 		},
@@ -66,7 +68,7 @@ func getReviewFromOpenAI(requirement string, reviewContent string) []string {
 	defer resp.Body.Close()
 
 	// Read the response body
-	reqBody, err := ioutil.ReadAll(resp.Body)
+	reqBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
 	}
